@@ -1,0 +1,52 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WA Bot By Mochammad Faisal</title>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Whatsapp API</h1>
+        <p>Powered by Mochammad Faisal</p>
+        <img src="" class="" alt="QR Code" id="qrcode">
+        <h3>Logs :</h3>
+        <ul class="logs"></ul>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"
+        integrity="sha512-2hIBfT6wur46uR5ayhmyICuA8s15BvJhagB+jZImgktQAy832P7EuY8njl1HGp4YS0Sk8DXRo9dByhvD3jfDxA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+
+        var socket = io.connect('http://localhost:8000', { path: '/socket.io' });
+
+        socket.on('message', function (msg) {
+            // console.log(msg);
+            $('.logs').append('<li>' + msg + '</li>');
+        });
+
+        socket.on('qr', function (src) {
+            $('#qrcode').attr('src', src);
+        });
+
+        socket.on('ready', function () {
+            $('#qrcode').hide();
+        });
+
+        socket.on('authenticated', function () {
+            $('#qrcode').hide();
+        });
+
+    </script>
+
+</body>
+
+</html>
