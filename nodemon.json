@@ -1,5 +1,6 @@
 {
     "ignore": [
-        "wabot-session.json"
+        "wabot-session.json",
+        "wabot-session*.json"
     ]
 }

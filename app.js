@@ -15,7 +15,9 @@ const server = http.createServer(app);
 const io = socketIO(server);
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+    extended: true
+}));
 app.use(fileUpload({
     debug: true
 }));
@@ -48,6 +50,7 @@ app.get('/', (req, res) => {
 });
 
 const client = new Client({
+    restartOnAuthFail: true,
     puppeteer: {
         headless: true,
         args: [
@@ -62,8 +65,7 @@ const client = new Client({
         ],
     },
     session: sessionCfg
-}
-);
+});
 
 
 /* On Events */
@@ -84,10 +86,12 @@ client.initialize();
 // Socket IO
 io.on('connection', function (socket) {
     socket.emit('message', 'Connecting...');
+    console.log('Connecting...');
 
     client.on('qr', (qr) => {
         // Generate and scan this code with your phone
         // console.log('QR RECEIVED', qr);
+        console.log('QR Code Received, Please Scan!');
         qrcode.toDataURL(qr, (err, url) => {
             socket.emit('qr', url);
             socket.emit('message', 'QR Code Received, Please Scan!');
@@ -117,10 +121,25 @@ io.on('connection', function (socket) {
         });
     });
 
+    client.on('auth_failure', function (session) {
+        socket.emit('message', 'Auth failure, restarting...');
+        console.log('Auth failure, restarting...');
+    });
+
+    client.on('disconnected', (reason) => {
+        socket.emit('message', 'Whatsapp is disconnected!');
+        fs.unlinkSync(SESSION_FILE_PATH, function (err) {
+            if (err) return console.log(err);
+            console.log('Session file deleted!');
+        });
+        client.destroy();
+        client.initialize();
+    });
 });
 
 io.on('disconnect', function (socket) {
     console.log('Client disconnect');
+    socket.emit('message', 'Client disconnect');
 });
 
 /* End Points */
